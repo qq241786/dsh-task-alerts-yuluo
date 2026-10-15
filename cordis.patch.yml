@@ -1,0 +1,17 @@
+# dsh-task-alerts bundle patch.
+#
+# Applied over the dsh-web-app layer by `dsh plugin --profile <name> add <dir>`.
+# A patch replaces the targeted row's whole `config`, so only additive `insert`
+# rows appear here — no shipped row is ever overridden.
+#
+# The host row below loads lib/index.js (config, audio, hotkey, reporter,
+# adapter, /alert-stop, /alert-test, and the /task-alerts HTTP routes).
+# The browser half is NOT listed here: it is loaded from the `dsh.client`
+# manifest in package.json, which the web client module loader consumes.
+
+- insert:
+    # Host half. `webServer` is requested through the optional accessor at
+    # runtime rather than through `inject`, so a profile without an HTTP
+    # server still loads the plugin and degrades to commands + audio only.
+    - id: task-alerts
+      name: 'dsh-task-alerts'

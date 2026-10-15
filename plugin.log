@@ -1,0 +1,32 @@
+2026-10-15T14:35:44.439Z [info] [task-alerts] 插件启动：包根=E:\dsh-task-alerts，报告目录=E:\deepseek work\dsh-task-alerts\reports，日志=E:\dsh-task-alerts\plugin.log
+2026-10-15T14:35:44.440Z [info] [task-alerts] 配置来源：E:\dsh-task-alerts\config.yaml → C:\Users\24178\.dsh\dsh-task-alerts.config.yaml
+2026-10-15T14:35:44.441Z [info] [task-alerts] 已监听 DSH 事件：agent/status, agent/turn-stopping, agent/error, agent/request-error
+2026-10-15T14:35:44.529Z [info] [task-alerts] OS 级快捷键已监听（1 个监听器 / 2 个绑定）：ctrl+alt+s + ctrl+alt+a
+2026-10-15T14:35:44.530Z [info] [task-alerts] 全局快捷键监听已就绪：停止=ctrl+alt+s，面板=ctrl+alt+a（1 个监听器 / 2 个绑定）
+2026-10-15T14:35:44.533Z [info] [task-alerts] 已注册命令 /alert-stop
+2026-10-15T14:35:44.533Z [info] [task-alerts] 已注册命令 /alert-test
+2026-10-15T14:35:44.534Z [info] [task-alerts] 可写配置 API 就绪：用户配置文件 C:\Users\24178\.dsh\dsh-task-alerts.config.yaml
+2026-10-15T14:35:44.534Z [info] [task-alerts] 已注册路由 exact /task-alerts/state
+2026-10-15T14:35:44.535Z [info] [task-alerts] 已注册路由 exact /task-alerts/control
+2026-10-15T14:35:44.535Z [info] [task-alerts] 已注册路由 exact /task-alerts/config
+2026-10-15T14:35:44.536Z [info] [task-alerts] 已通过 ctx.provide("taskAlerts", ...) 暴露服务
+2026-10-15T14:36:09.829Z [debug] [task-alerts] 响铃循环已启动：每次播放结束后等 10000ms 再响，上限 不限
+2026-10-15T14:36:10.204Z [debug] [task-alerts] 响铃循环已启动：每次播放结束后等 10000ms 再响，上限 不限
+2026-10-15T14:36:48.101Z [warn] [task-alerts] 配置校验失败：{"audioPath":"不能为空"}
+2026-10-15T14:36:55.478Z [info] [task-alerts] 快捷键触发，但当前没有在播放的音效
+2026-10-15T14:38:02.645Z [debug] [task-alerts] 响铃循环已启动：每次播放结束后等 10000ms 再响，上限 不限
+2026-10-15T14:38:03.029Z [debug] [task-alerts] 响铃循环已启动：每次播放结束后等 10000ms 再响，上限 不限
+2026-10-15T14:38:25.912Z [info] [task-alerts] 快捷键已停止音效
+2026-10-15T15:12:34.823Z [info] [task-alerts] 插件已卸载
+2026-10-15T15:12:50.001Z [info] [task-alerts] 插件启动：包根=E:\dsh-task-alerts，报告目录=E:\deepseek work\dsh-task-alerts\reports，日志=E:\dsh-task-alerts\plugin.log
+2026-10-15T15:12:50.002Z [info] [task-alerts] 配置来源：E:\dsh-task-alerts\config.yaml → C:\Users\24178\.dsh\dsh-task-alerts.config.yaml
+2026-10-15T15:12:50.002Z [info] [task-alerts] 已监听 DSH 事件：agent/status, agent/turn-stopping, agent/error, agent/request-error
+2026-10-15T15:12:50.027Z [info] [task-alerts] OS 级快捷键已监听（1 个监听器 / 2 个绑定）：ctrl+alt+s + ctrl+alt+a
+2026-10-15T15:12:50.027Z [info] [task-alerts] 全局快捷键监听已就绪：停止=ctrl+alt+s，面板=ctrl+alt+a（1 个监听器 / 2 个绑定）
+2026-10-15T15:12:50.028Z [info] [task-alerts] 已注册命令 /alert-stop
+2026-10-15T15:12:50.028Z [info] [task-alerts] 已注册命令 /alert-test
+2026-10-15T15:12:50.029Z [info] [task-alerts] 可写配置 API 就绪：用户配置文件 C:\Users\24178\.dsh\dsh-task-alerts.config.yaml
+2026-10-15T15:12:50.029Z [info] [task-alerts] 已注册路由 exact /task-alerts/state
+2026-10-15T15:12:50.030Z [info] [task-alerts] 已注册路由 exact /task-alerts/control
+2026-10-15T15:12:50.030Z [info] [task-alerts] 已注册路由 exact /task-alerts/config
+2026-10-15T15:12:50.030Z [info] [task-alerts] 已通过 ctx.provide("taskAlerts", ...) 暴露服务

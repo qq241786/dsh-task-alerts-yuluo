@@ -1,0 +1,85 @@
+# dsh-task-alerts configuration
+#
+# Resolution order (highest first):
+#   1. the second argument of the plugin's apply(ctx, config)  (cordis row config)
+#   2. <DSH_HOME>/dsh-task-alerts.config.yaml
+#   3. this file (plugin package root)
+#   4. built-in defaults
+#
+# Relative paths resolve against the plugin package root. If that directory is
+# not writable they fall back to <DSH_HOME>/dsh-task-alerts/.
+
+# Sound played when an alert fires. Relative to the plugin package root.
+# On Windows a .wav is played by System.Media.SoundPlayer; on macOS by afplay;
+# on Linux by paplay/aplay. A missing or unreadable file is logged and skipped.
+audio_path: "./alert.wav"
+
+# Directory for the TXT reports written for unsolved problems.
+report_dir: "./reports"
+
+# A problem is declared "unresolved" once its failed attempt count reaches this.
+max_attempts: 2
+
+# Hotkey that stops the currently ringing sound (does not unload the plugin).
+# Two layers, both configurable with this one value:
+#   * in-app   — when the DSH window has focus (browser keydown listener)
+#   * global   — OS-wide, via the optional node-global-key-listener package
+stop_hotkey: "ctrl+alt+s"
+
+# Hotkey that opens / collapses the reminder panel (does not unload the plugin).
+# Same two layers as stop_hotkey: in-app while the DSH window has focus, and
+# OS-wide through node-global-key-listener.
+panel_hotkey: "ctrl+alt+a"
+
+# Keep a collapsed handle of the reminder panel on screen while nothing is
+# pending, so the panel can ALWAYS be re-opened after being closed.
+# false = no permanent entry point (the pre-1.3 behaviour: closed means gone).
+show_pill: true
+
+# Play a sound and show a lightweight toast when a program/turn finishes.
+program_finish_alert: true
+
+# Play a sound, show the glass panel and write a report when a problem
+# reaches max_attempts without being solved.
+alert_on_unresolved: true
+
+# Master switch. false = no sound, no panel, no toast, and the ring loop never
+# starts. The settings page and /alert-test stay fully usable while this is
+# false — that is what makes "turn it on again" possible.
+enabled: true
+
+# ---------------------------------------------------------------------------
+# Ringing until the alert is closed
+# ---------------------------------------------------------------------------
+
+# Seconds between repeats while the alert is still open. The sound keeps ringing
+# every `repeat_interval` seconds until it is stopped: /alert-stop, the panel's
+# "停止音效" button, closing the alert, or dismissing it from the UI.
+# 0 disables repeating (the sound plays once).
+repeat_interval: 10
+
+# Upper bound on repeats per alert. 0 = unlimited (ring until closed).
+repeat_max: 0
+
+# ---------------------------------------------------------------------------
+# Report opening
+# ---------------------------------------------------------------------------
+
+# Open the generated report automatically:
+#   none    — do nothing (default; the panel's "打开报告" button always works)
+#   file    — open the .txt with the OS default application
+#   folder  — open the containing folder (on Windows with the file selected)
+#   browser — open the report through the OS default handler as a file:// URL
+report_auto_open: "none"
+
+# Glassmorphism parameters. Ranges are clamped at load time:
+# blur_strength 0..40, border_radius 0..48, opacity 0.05..1.
+ui:
+  blur_strength: 10
+  primary_color: "#87CEEB"
+  border_radius: 20
+  opacity: 0.7
+
+# Plugin log file. Relative to the plugin package root. Falls back to
+# <DSH_HOME>/dsh-task-alerts/plugin.log when the package root is read-only.
+log_file: "./plugin.log"

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "none",
+    "jsx": "react",
+    "noEmitOnError": false,
+    "types": [],
+    "rootDir": "src/ui",
+    "outDir": "build/client",
+    "declaration": false,
+    "sourceMap": false,
+    "strict": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": false,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true
+  },
+  "include": ["src/ui/**/*.ts", "src/ui/**/*.tsx"],
+  "exclude": ["lib/**", "build/**", "node_modules/**"]
+}
