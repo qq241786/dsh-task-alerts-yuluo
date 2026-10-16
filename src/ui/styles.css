@@ -1,0 +1,1261 @@
+/* =============================================================================
+ * dsh-task-alerts — browser half stylesheet (glassmorphism).
+ *
+ * Contract §8:
+ *   root host container  -> .dsa-root   (data-dsa-scheme="light" | "dark")
+ *   panel                -> .dsa-panel
+ *   toast                -> .dsa-toast
+ *   six variables        -> --dsa-blur / --dsa-primary / --dsa-radius
+ *                           --dsa-opacity / --dsa-tint / --dsa-tint-soft
+ *
+ * The client half overrides the six variables inline on .dsa-root from the
+ * host state (config.ui). The defaults below are the contract defaults and are
+ * what a bare .dsa-root renders with.
+ *
+ * `shell.overlay` is a click-through list slot (ui-layout), so the root host is
+ * `pointer-events: none` and every interactive surface opts back in.
+ * ========================================================================== */
+
+/* --------------------------------------------------------------------------
+ * 1. Tokens
+ * ----------------------------------------------------------------------- */
+
+.dsa-root {
+  --dsa-blur: 10px;            /* px — backdrop blur strength */
+  --dsa-primary: #87CEEB;      /* sky blue — the plugin accent */
+  --dsa-radius: 20px;          /* 16px..24px reads best; 20px is the shipped default */
+  --dsa-opacity: 0.7;          /* panel body opacity (0.05..1) */
+  --dsa-tint: #87CEEB;         /* gradient start */
+  --dsa-tint-soft: #E0F7FA;    /* gradient end */
+
+  --dsa-edge: 24px;            /* distance from the frame edges */
+  --dsa-stack-gap: 10px;
+  --dsa-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  pointer-events: none;        /* click-through by default */
+  color: #10222b;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Fallback for engines without the `var()`-in-color-path resolution used below:
+   a solid translucent sky blue still reads as frosted glass, just flatter. */
+@supports not (backdrop-filter: blur(1px)) {
+  .dsa-root {
+    --dsa-blur: 0px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+ * 2. Panel — bottom-right, glass card
+ * ----------------------------------------------------------------------- */
+
+.dsa-panel {
+  position: absolute;
+  right: var(--dsa-edge);
+  bottom: var(--dsa-edge);
+
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 280px;
+  max-width: min(420px, calc(100vw - 48px));
+  max-height: calc(100vh - 48px);
+  overflow: hidden auto;
+  padding: 14px 16px 12px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(135, 206, 235, calc(var(--dsa-opacity) * 0.92)) 0%,
+    rgba(224, 247, 250, calc(var(--dsa-opacity) * 0.78)) 55%,
+    rgba(255, 255, 255, calc(var(--dsa-opacity) * 0.86)) 100%
+  );
+
+  backdrop-filter: blur(var(--dsa-blur)) saturate(1.55);
+  -webkit-backdrop-filter: blur(var(--dsa-blur)) saturate(1.55);
+
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: var(--dsa-radius);
+
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.65) inset,
+    0 -1px 0 rgba(135, 206, 235, 0.22) inset,
+    0 6px 16px rgba(135, 206, 235, 0.20),
+    0 18px 44px rgba(56, 128, 168, 0.20),
+    0 2px 6px rgba(16, 34, 43, 0.10);
+
+  pointer-events: auto;
+  transition:
+    box-shadow 0.24s var(--dsa-ease),
+    transform 0.24s var(--dsa-ease),
+    opacity 0.24s var(--dsa-ease);
+
+  animation: dsa-rise-in 0.28s var(--dsa-ease) both;
+}
+
+.dsa-panel:hover {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 8px 20px rgba(135, 206, 235, 0.28),
+    0 24px 56px rgba(56, 128, 168, 0.26),
+    0 2px 8px rgba(16, 34, 43, 0.12);
+}
+
+/* --------------------------------------------------------------------------
+ * 3. Dark scheme — same hue, compressed luminance
+ * ----------------------------------------------------------------------- */
+
+[data-dsa-scheme="dark"] {
+  color: #e6f4fa;
+}
+
+[data-dsa-scheme="dark"] .dsa-panel {
+  background: linear-gradient(
+    135deg,
+    rgba(64, 122, 150, calc(var(--dsa-opacity) * 0.92)) 0%,
+    rgba(28, 60, 76, calc(var(--dsa-opacity) * 0.9)) 58%,
+    rgba(18, 40, 52, calc(var(--dsa-opacity) * 0.94)) 100%
+  );
+  border-color: rgba(160, 216, 236, 0.28);
+  box-shadow:
+    0 1px 0 rgba(200, 238, 252, 0.14) inset,
+    0 -1px 0 rgba(135, 206, 235, 0.16) inset,
+    0 8px 22px rgba(0, 0, 0, 0.42),
+    0 22px 52px rgba(0, 0, 0, 0.34),
+    0 0 0 1px rgba(135, 206, 235, 0.08);
+}
+
+[data-dsa-scheme="dark"] .dsa-panel:hover {
+  box-shadow:
+    0 1px 0 rgba(200, 238, 252, 0.18) inset,
+    0 10px 26px rgba(0, 0, 0, 0.46),
+    0 26px 60px rgba(0, 0, 0, 0.38),
+    0 0 0 1px rgba(135, 206, 235, 0.12);
+}
+
+[data-dsa-scheme="dark"] .dsa-toast {
+  background: linear-gradient(
+    135deg,
+    rgba(64, 122, 150, calc(var(--dsa-opacity) * 0.9)) 0%,
+    rgba(26, 56, 72, calc(var(--dsa-opacity) * 0.92)) 100%
+  );
+  border-color: rgba(160, 216, 236, 0.24);
+  box-shadow:
+    0 1px 0 rgba(200, 238, 252, 0.12) inset,
+    0 8px 20px rgba(0, 0, 0, 0.38),
+    0 18px 40px rgba(0, 0, 0, 0.3);
+}
+
+[data-dsa-scheme="dark"] .dsa-btn {
+  background: rgba(214, 240, 250, 0.12);
+  border-color: rgba(180, 226, 244, 0.3);
+  color: #e6f4fa;
+}
+
+[data-dsa-scheme="dark"] .dsa-btn:hover {
+  box-shadow: 0 0 0 1px rgba(135, 206, 235, 0.4), 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+[data-dsa-scheme="dark"] .dsa-btn--primary {
+  background: linear-gradient(135deg, rgba(135, 206, 235, 0.9), rgba(96, 168, 200, 0.88));
+  border-color: rgba(224, 247, 250, 0.5);
+  color: #08181f;
+}
+
+[data-dsa-scheme="dark"] .dsa-sub,
+[data-dsa-scheme="dark"] .dsa-meta,
+[data-dsa-scheme="dark"] .dsa-row-sub {
+  color: rgba(198, 230, 244, 0.72);
+}
+
+[data-dsa-scheme="dark"] .dsa-row {
+  background: rgba(214, 240, 250, 0.07);
+  border-color: rgba(180, 226, 244, 0.16);
+}
+
+[data-dsa-scheme="dark"] .dsa-badge {
+  background: rgba(135, 206, 235, 0.2);
+  border-color: rgba(180, 226, 244, 0.28);
+}
+
+[data-dsa-scheme="dark"] .dsa-path code {
+  background: rgba(0, 0, 0, 0.32);
+  border-color: rgba(180, 226, 244, 0.18);
+}
+
+/* --------------------------------------------------------------------------
+ * 3b. Collapsed pill — the permanent panel entry point (contract §13.4)
+ *
+ * It sits in the SAME bottom-right corner as `.dsa-panel`, but both forms come
+ * out of the same seat and are mutually exclusive, so they can never overlap.
+ * The toast lives top-right, so nothing here can collide with it either.
+ * `shell.overlay` is click-through, so the pill opts back in explicitly.
+ * ----------------------------------------------------------------------- */
+
+.dsa-pill {
+  position: absolute;
+  right: var(--dsa-edge);
+  bottom: var(--dsa-edge);
+
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-sizing: border-box;
+  padding: 5px 8px 5px 12px;
+  min-height: 30px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(135, 206, 235, calc(var(--dsa-opacity) * 0.92)) 0%,
+    rgba(224, 247, 250, calc(var(--dsa-opacity) * 0.78)) 58%,
+    rgba(255, 255, 255, calc(var(--dsa-opacity) * 0.88)) 100%
+  );
+
+  backdrop-filter: blur(var(--dsa-blur)) saturate(1.45);
+  -webkit-backdrop-filter: blur(var(--dsa-blur)) saturate(1.45);
+
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 999px;
+
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.62) inset,
+    0 4px 12px rgba(135, 206, 235, 0.26),
+    0 10px 26px rgba(56, 128, 168, 0.18);
+
+  color: #10222b;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+  pointer-events: auto;        /* `shell.overlay` itself stays click-through */
+  transition:
+    transform 0.2s var(--dsa-ease),
+    box-shadow 0.2s var(--dsa-ease);
+  animation: dsa-rise-in 0.24s var(--dsa-ease) both;
+}
+
+.dsa-pill:hover {
+  transform: scale(1.04);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.7) inset,
+    0 6px 16px rgba(135, 206, 235, 0.34),
+    0 16px 34px rgba(56, 128, 168, 0.24);
+}
+
+.dsa-pill:active {
+  transform: scale(0.97);
+}
+
+.dsa-pill:focus-visible {
+  outline: 2px solid var(--dsa-primary);
+  outline-offset: 2px;
+}
+
+.dsa-pill-badge {
+  flex: 0 0 auto;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(120, 160, 180, 0.45);
+}
+
+.dsa-pill--pending .dsa-pill-badge {
+  background: #4C9EC4;
+}
+
+/* "Still ringing" is a soft halo, never a flash (contract §8/§11.6). */
+.dsa-pill--ring .dsa-pill-badge {
+  background: #2F80A8;
+  animation: dsa-ring-pulse 1.6s var(--dsa-ease) infinite;
+}
+
+.dsa-pill-text {
+  white-space: nowrap;
+}
+
+.dsa-pill-expand {
+  box-sizing: border-box;
+  margin-left: 2px;
+  padding: 3px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.62);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  color: #0d3b4d;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  pointer-events: auto;
+  transition: background 0.2s var(--dsa-ease);
+}
+
+.dsa-pill-expand:hover {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.dsa-pill-expand:active {
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.dsa-pill-expand:focus-visible {
+  outline: 2px solid var(--dsa-primary);
+  outline-offset: 2px;
+}
+
+[data-dsa-scheme="dark"] .dsa-pill {
+  background: linear-gradient(
+    135deg,
+    rgba(64, 122, 150, calc(var(--dsa-opacity) * 0.92)) 0%,
+    rgba(28, 60, 76, calc(var(--dsa-opacity) * 0.9)) 58%,
+    rgba(18, 40, 52, calc(var(--dsa-opacity) * 0.94)) 100%
+  );
+  border-color: rgba(160, 216, 236, 0.28);
+  color: #e6f4fa;
+  box-shadow:
+    0 1px 0 rgba(200, 238, 252, 0.14) inset,
+    0 6px 18px rgba(0, 0, 0, 0.4),
+    0 16px 34px rgba(0, 0, 0, 0.32);
+}
+
+[data-dsa-scheme="dark"] .dsa-pill-badge {
+  background: rgba(160, 216, 236, 0.45);
+}
+
+[data-dsa-scheme="dark"] .dsa-pill--pending .dsa-pill-badge,
+[data-dsa-scheme="dark"] .dsa-pill--ring .dsa-pill-badge {
+  background: #7FD0EE;
+}
+
+[data-dsa-scheme="dark"] .dsa-pill-expand {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(160, 216, 236, 0.28);
+  color: #e6f4fa;
+}
+
+[data-dsa-scheme="dark"] .dsa-pill-expand:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Expanded panel with nothing pending (contract §13.4): states the fact, then
+   the recent-alert list follows. */
+.dsa-empty {
+  padding: 8px 10px;
+  border: 1px dashed rgba(135, 206, 235, 0.6);
+  border-radius: calc(var(--dsa-radius) * 0.5);
+  background: rgba(255, 255, 255, calc(var(--dsa-opacity) * 0.5));
+  color: #33596a;
+}
+
+[data-dsa-scheme="dark"] .dsa-empty {
+  background: rgba(0, 0, 0, 0.18);
+  border-color: rgba(160, 216, 236, 0.3);
+  color: #bcd9e6;
+}
+
+/* --------------------------------------------------------------------------
+ * 4. Toast — top-right, compact glass stack
+ * ----------------------------------------------------------------------- */
+
+.dsa-toast-stack {
+  position: absolute;
+  top: var(--dsa-edge);
+  right: var(--dsa-edge);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--dsa-stack-gap);
+  max-width: min(360px, calc(100vw - 48px));
+  pointer-events: none;        /* only the toast body is interactive */
+}
+
+.dsa-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  box-sizing: border-box;
+  min-width: 220px;
+  max-width: min(360px, calc(100vw - 48px));
+  padding: 10px 12px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(135, 206, 235, calc(var(--dsa-opacity) * 0.95)) 0%,
+    rgba(224, 247, 250, calc(var(--dsa-opacity) * 0.88)) 100%
+  );
+
+  backdrop-filter: blur(var(--dsa-blur)) saturate(1.5);
+  -webkit-backdrop-filter: blur(var(--dsa-blur)) saturate(1.5);
+
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: calc(var(--dsa-radius) * 0.6);
+
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 4px 12px rgba(135, 206, 235, 0.22),
+    0 12px 28px rgba(56, 128, 168, 0.18),
+    0 1px 4px rgba(16, 34, 43, 0.1);
+
+  pointer-events: auto;
+  transition:
+    box-shadow 0.22s var(--dsa-ease),
+    transform 0.22s var(--dsa-ease),
+    opacity 0.22s var(--dsa-ease);
+
+  animation: dsa-drop-in 0.24s var(--dsa-ease) both;
+}
+
+.dsa-toast:hover {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.65) inset,
+    0 6px 16px rgba(135, 206, 235, 0.3),
+    0 16px 36px rgba(56, 128, 168, 0.24);
+}
+
+.dsa-toast-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dsa-toast-title {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  overflow-wrap: anywhere;
+}
+
+.dsa-toast-msg {
+  font-size: 12px;
+  opacity: 0.82;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+/* --------------------------------------------------------------------------
+ * 5. Panel internals
+ * ----------------------------------------------------------------------- */
+
+.dsa-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dsa-title {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.dsa-icon-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: calc(var(--dsa-radius) * 0.5);
+  background: rgba(255, 255, 255, 0.18);
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.18s var(--dsa-ease), transform 0.18s var(--dsa-ease);
+}
+
+.dsa-icon-btn:hover {
+  background: rgba(255, 255, 255, 0.34);
+  transform: scale(1.04);
+}
+
+.dsa-icon-btn:active {
+  transform: scale(0.97);
+}
+
+.dsa-sub {
+  font-size: 12px;
+  opacity: 0.72;
+}
+
+.dsa-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  font-size: 12px;
+  opacity: 0.78;
+}
+
+.dsa-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 7px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.32);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.dsa-badge--live {
+  border-color: rgba(135, 206, 235, 0.6);
+  background: rgba(135, 206, 235, 0.28);
+}
+
+.dsa-badge--error {
+  border-color: rgba(214, 92, 92, 0.45);
+  background: rgba(214, 92, 92, 0.2);
+}
+
+.dsa-badge--success {
+  border-color: rgba(72, 170, 128, 0.45);
+  background: rgba(72, 170, 128, 0.2);
+}
+
+/* --------------------------------------------------------------------------
+ * 5b. Ringing indicator (contract §11.6)
+ * ----------------------------------------------------------------------- */
+
+.dsa-ring {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: var(--dsa-primary);
+  box-shadow: 0 0 0 0 rgba(135, 206, 235, 0.6);
+  animation: dsa-ring-pulse 1.5s var(--dsa-ease) infinite;
+  flex: 0 0 auto;
+}
+
+/* The full status line: "重复提醒中 · 第 N 次 · 每 M 秒" */
+.dsa-ring-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 5px 9px;
+  border: 1px solid rgba(135, 206, 235, 0.55);
+  border-radius: calc(var(--dsa-radius) * 0.55);
+  background: rgba(135, 206, 235, 0.2);
+  backdrop-filter: blur(var(--dsa-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--dsa-blur)) saturate(1.4);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.dsa-btn--ring {
+  border-color: rgba(135, 206, 235, 0.8);
+  box-shadow:
+    0 0 0 1px rgba(135, 206, 235, 0.6),
+    0 4px 14px rgba(135, 206, 235, 0.42);
+}
+
+.dsa-btn--ring:hover:not(:disabled) {
+  box-shadow:
+    0 0 0 1px rgba(135, 206, 235, 0.85),
+    0 8px 22px rgba(135, 206, 235, 0.55),
+    0 2px 6px rgba(16, 34, 43, 0.16);
+}
+
+[data-dsa-scheme="dark"] .dsa-ring {
+  box-shadow: 0 0 0 0 rgba(135, 206, 235, 0.5);
+}
+
+[data-dsa-scheme="dark"] .dsa-ring-row {
+  border-color: rgba(135, 206, 235, 0.42);
+  background: rgba(135, 206, 235, 0.16);
+}
+
+[data-dsa-scheme="dark"] .dsa-btn--ring {
+  box-shadow:
+    0 0 0 1px rgba(135, 206, 235, 0.45),
+    0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.dsa-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: calc(var(--dsa-radius) * 0.7);
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.dsa-card-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.dsa-card-msg {
+  font-size: 12px;
+  opacity: 0.82;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.dsa-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dsa-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: calc(var(--dsa-radius) * 0.55);
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.dsa-row-main {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.dsa-row-sub {
+  font-size: 11.5px;
+  opacity: 0.68;
+  overflow-wrap: anywhere;
+}
+
+.dsa-path {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+}
+
+.dsa-path code {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 2px 6px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.34);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: all;
+  cursor: text;
+}
+
+/* --------------------------------------------------------------------------
+ * 6. Buttons
+ * ----------------------------------------------------------------------- */
+
+.dsa-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.dsa-btn {
+  flex: 0 1 auto;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: calc(var(--dsa-radius) * 0.5);
+  background: rgba(255, 255, 255, 0.28);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition:
+    transform 0.16s var(--dsa-ease),
+    box-shadow 0.16s var(--dsa-ease),
+    background 0.16s var(--dsa-ease),
+    opacity 0.16s var(--dsa-ease);
+}
+
+.dsa-btn:hover:not(:disabled) {
+  transform: scale(1.04);
+  box-shadow:
+    0 0 0 1px rgba(135, 206, 235, 0.55),
+    0 6px 16px rgba(135, 206, 235, 0.36),
+    0 2px 6px rgba(16, 34, 43, 0.12);
+}
+
+.dsa-btn:active:not(:disabled) {
+  transform: scale(0.97);
+  box-shadow: 0 0 0 1px rgba(135, 206, 235, 0.4);
+}
+
+.dsa-btn:focus-visible {
+  outline: 2px solid var(--dsa-tint);
+  outline-offset: 2px;
+}
+
+.dsa-btn--primary {
+  border-color: rgba(255, 255, 255, 0.72);
+  background: linear-gradient(135deg, rgba(135, 206, 235, 0.96), rgba(224, 247, 250, 0.92));
+  color: #0c2630;
+}
+
+.dsa-btn--primary:hover:not(:disabled) {
+  box-shadow:
+    0 0 0 1px rgba(135, 206, 235, 0.7),
+    0 8px 20px rgba(135, 206, 235, 0.46),
+    0 2px 6px rgba(16, 34, 43, 0.14);
+}
+
+.dsa-btn:disabled,
+.dsa-btn[aria-disabled="true"] {
+  opacity: 0.45;
+  filter: grayscale(0.6);
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* --------------------------------------------------------------------------
+ * 7. Motion
+ * ----------------------------------------------------------------------- */
+
+@keyframes dsa-rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dsa-drop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Soft pulse for the "still ringing" dot: grows a halo, never flashes. */
+@keyframes dsa-ring-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(135, 206, 235, 0.62);
+    opacity: 1;
+  }
+  70% {
+    box-shadow: 0 0 0 7px rgba(135, 206, 235, 0);
+    opacity: 0.72;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(135, 206, 235, 0);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dsa-panel,
+  .dsa-toast,
+  .dsa-pill {
+    animation: none;
+  }
+
+  /* Contract §11.6: the pulse must never be the only carrier of "still ringing";
+     with motion reduced the dot stays solid and the text line says the rest. */
+  .dsa-ring,
+  .dsa-pill--ring .dsa-pill-badge {
+    animation: none;
+    box-shadow: none;
+    opacity: 1;
+  }
+
+  .dsa-panel,
+  .dsa-toast,
+  .dsa-pill,
+  .dsa-btn,
+  .dsa-icon-btn {
+    transition: none;
+  }
+
+  .dsa-pill:hover,
+  .dsa-btn:hover:not(:disabled),
+  .dsa-icon-btn:hover {
+    transform: none;
+  }
+
+  .dsa-pill:active,
+  .dsa-btn:active:not(:disabled),
+  .dsa-icon-btn:active {
+    transform: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+ * 8. Narrow viewports
+ * ----------------------------------------------------------------------- */
+
+@media (max-width: 520px) {
+  .dsa-root {
+    --dsa-edge: 12px;
+  }
+
+  .dsa-panel {
+    min-width: 0;
+    max-width: calc(100vw - 24px);
+  }
+
+  .dsa-toast-stack {
+    max-width: calc(100vw - 24px);
+  }
+
+  .dsa-toast {
+    min-width: 0;
+    max-width: calc(100vw - 24px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+ * 9. Settings page + sidebar action (contract §12.7)
+ *
+ * `.dsa-inline` is the in-flow twin of `.dsa-root`: the same six §8 variables,
+ * but no fixed positioning, no z-index and no pointer-events tricks, because
+ * these two seats render inside DSH's settings modal and sidebar foot rather
+ * than inside the click-through overlay.
+ * ----------------------------------------------------------------------- */
+
+.dsa-inline {
+  --dsa-blur: 10px;
+  --dsa-primary: #87CEEB;
+  --dsa-radius: 20px;
+  --dsa-opacity: 0.7;
+  --dsa-tint: #87CEEB;
+  --dsa-tint-soft: #E0F7FA;
+  --dsa-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  color: #10222b;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.dsa-inline[data-dsa-scheme="dark"] {
+  color: #e6f4fa;
+}
+
+@supports not (backdrop-filter: blur(1px)) {
+  .dsa-inline {
+    --dsa-blur: 0px;
+  }
+}
+
+/* --- settings page ------------------------------------------------------- */
+
+.dsa-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 640px;
+  padding: 14px 16px;
+
+  background: linear-gradient(
+    135deg,
+    rgba(135, 206, 235, calc(var(--dsa-opacity) * 0.5)) 0%,
+    rgba(224, 247, 250, calc(var(--dsa-opacity) * 0.42)) 55%,
+    rgba(255, 255, 255, calc(var(--dsa-opacity) * 0.58)) 100%
+  );
+
+  backdrop-filter: blur(var(--dsa-blur)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--dsa-blur)) saturate(1.4);
+
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: var(--dsa-radius);
+
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 6px 18px rgba(135, 206, 235, 0.18),
+    0 16px 40px rgba(56, 128, 168, 0.14);
+}
+
+.dsa-settings .dsa-header {
+  align-items: flex-start;
+}
+
+.dsa-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.dsa-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 10px 14px;
+}
+
+.dsa-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.42);
+  border-radius: calc(var(--dsa-radius) * 0.7);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.dsa-group-title {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  opacity: 0.86;
+}
+
+.dsa-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.dsa-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.dsa-input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 5px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: calc(var(--dsa-radius) * 0.45);
+  background: rgba(255, 255, 255, 0.5);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  transition: box-shadow 0.16s var(--dsa-ease), border-color 0.16s var(--dsa-ease);
+}
+
+.dsa-input:hover {
+  box-shadow: 0 0 0 1px rgba(135, 206, 235, 0.35);
+}
+
+.dsa-input:focus-visible {
+  outline: none;
+  border-color: var(--dsa-primary);
+  box-shadow: 0 0 0 1px rgba(135, 206, 235, 0.7), 0 4px 14px rgba(135, 206, 235, 0.35);
+}
+
+.dsa-field[data-dsa-invalid="true"] .dsa-input {
+  border-color: rgba(214, 92, 92, 0.65);
+}
+
+/* --------------------------------------------------------------------------
+ * Segmented choice group — the replacement for native <select>.
+ *
+ * Every option is always rendered in flow, so nothing depends on a popup layer:
+ * it cannot be clipped by an ancestor's overflow and cannot come out as
+ * same-colour text (both failure modes were observed with a native <select>).
+ * ----------------------------------------------------------------------- */
+
+.dsa-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+}
+
+.dsa-choice {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  box-sizing: border-box;
+  padding: 4px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: calc(var(--dsa-radius) * 0.45);
+  background: rgba(255, 255, 255, 0.42);
+  color: inherit;
+  font-size: 12px;
+  line-height: 1.4;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    box-shadow 0.16s var(--dsa-ease),
+    border-color 0.16s var(--dsa-ease),
+    transform 0.16s var(--dsa-ease);
+}
+
+.dsa-choice:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 0 1px rgba(135, 206, 235, 0.35), 0 4px 12px rgba(135, 206, 235, 0.22);
+}
+
+.dsa-choice:active {
+  transform: scale(0.98);
+}
+
+/* The real radio is kept for semantics and keyboard/AT behaviour, but is
+   visually replaced by the segmented surface (focus-visible still shows). */
+.dsa-choice-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.dsa-choice:has(.dsa-choice-input:focus-visible) {
+  outline: none;
+  border-color: var(--dsa-primary);
+  box-shadow: 0 0 0 1px rgba(135, 206, 235, 0.7), 0 4px 14px rgba(135, 206, 235, 0.35);
+}
+
+.dsa-choice--on {
+  border-color: var(--dsa-primary);
+  background: linear-gradient(135deg, rgba(135, 206, 235, 0.55), rgba(224, 247, 250, 0.45));
+  box-shadow: 0 0 0 1px rgba(135, 206, 235, 0.55), 0 4px 14px rgba(135, 206, 235, 0.28);
+  font-weight: 600;
+}
+
+.dsa-inline[data-dsa-scheme="dark"] .dsa-choice {
+  border-color: rgba(160, 216, 236, 0.3);
+  background: rgba(28, 60, 76, 0.55);
+}
+
+.dsa-inline[data-dsa-scheme="dark"] .dsa-choice--on {
+  border-color: var(--dsa-primary);
+  background: linear-gradient(135deg, rgba(64, 122, 150, 0.75), rgba(28, 60, 76, 0.6));
+}
+
+/* Defensive: if a native <select> is ever reintroduced, at least pin the option
+   colours so the list can never come out as same-colour text. */
+.dsa-input option {
+  background-color: #ffffff;
+  color: #10222b;
+}
+
+.dsa-inline[data-dsa-scheme="dark"] .dsa-input option {
+  background-color: #10303c;
+  color: #e6f4fa;
+}
+
+.dsa-switch {
+  width: 16px;
+  height: 16px;
+  margin: 2px 0 0;
+  accent-color: var(--dsa-primary);
+  cursor: pointer;
+}
+
+.dsa-switch:focus-visible {
+  outline: 2px solid var(--dsa-tint);
+  outline-offset: 2px;
+}
+
+.dsa-error {
+  font-size: 11.5px;
+  color: #a83a3a;
+}
+
+.dsa-hint {
+  font-size: 11.5px;
+  opacity: 0.72;
+  overflow-wrap: anywhere;
+}
+
+.dsa-hint--warn {
+  padding: 6px 9px;
+  border: 1px solid rgba(214, 158, 60, 0.5);
+  border-radius: calc(var(--dsa-radius) * 0.5);
+  background: rgba(214, 158, 60, 0.16);
+  opacity: 1;
+}
+
+.dsa-hint--ok {
+  padding: 6px 9px;
+  border: 1px solid rgba(72, 170, 128, 0.5);
+  border-radius: calc(var(--dsa-radius) * 0.5);
+  background: rgba(72, 170, 128, 0.16);
+  opacity: 1;
+}
+
+.dsa-hint--error {
+  padding: 6px 9px;
+  border: 1px solid rgba(214, 92, 92, 0.5);
+  border-radius: calc(var(--dsa-radius) * 0.5);
+  background: rgba(214, 92, 92, 0.14);
+  opacity: 1;
+}
+
+.dsa-badge--off {
+  border-color: rgba(140, 140, 140, 0.5);
+  background: rgba(140, 140, 140, 0.18);
+}
+
+.dsa-save {
+  border-color: rgba(135, 206, 235, 0.7);
+}
+
+.dsa-save:hover:not(:disabled) {
+  box-shadow:
+    0 0 0 1px rgba(135, 206, 235, 0.75),
+    0 8px 20px rgba(135, 206, 235, 0.42),
+    0 2px 6px rgba(16, 34, 43, 0.14);
+}
+
+/* --- sidebar-footer action ---------------------------------------------- */
+
+.dsa-sidebar-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  padding: 5px 9px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: calc(var(--dsa-radius) * 0.5);
+  background: rgba(255, 255, 255, 0.26);
+  color: inherit;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 0.16s var(--dsa-ease),
+    box-shadow 0.16s var(--dsa-ease),
+    background 0.16s var(--dsa-ease);
+}
+
+.dsa-sidebar-action:hover {
+  transform: scale(1.04);
+  box-shadow:
+    0 0 0 1px rgba(135, 206, 235, 0.55),
+    0 6px 16px rgba(135, 206, 235, 0.36);
+}
+
+.dsa-sidebar-action:active {
+  transform: scale(0.97);
+}
+
+.dsa-sidebar-action:focus-visible {
+  outline: 2px solid var(--dsa-tint);
+  outline-offset: 2px;
+}
+
+.dsa-sidebar-action-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+
+.dsa-sidebar-action-hint {
+  font-size: 10.5px;
+  font-weight: 500;
+  opacity: 0.66;
+}
+
+.dsa-sidebar-action--collapsed {
+  border-color: rgba(135, 206, 235, 0.6);
+  background: rgba(135, 206, 235, 0.2);
+}
+
+/* --- dark scheme -------------------------------------------------------- */
+
+.dsa-inline[data-dsa-scheme="dark"] .dsa-settings {
+  background: linear-gradient(
+    135deg,
+    rgba(64, 122, 150, calc(var(--dsa-opacity) * 0.62)) 0%,
+    rgba(28, 60, 76, calc(var(--dsa-opacity) * 0.66)) 58%,
+    rgba(18, 40, 52, calc(var(--dsa-opacity) * 0.7)) 100%
+  );
+  border-color: rgba(160, 216, 236, 0.28);
+  box-shadow:
+    0 1px 0 rgba(200, 238, 252, 0.14) inset,
+    0 8px 22px rgba(0, 0, 0, 0.38),
+    0 20px 48px rgba(0, 0, 0, 0.3);
+}
+
+.dsa-inline[data-dsa-scheme="dark"] .dsa-group {
+  border-color: rgba(180, 226, 244, 0.16);
+  background: rgba(214, 240, 250, 0.06);
+}
+
+.dsa-inline[data-dsa-scheme="dark"] .dsa-input {
+  border-color: rgba(180, 226, 244, 0.28);
+  background: rgba(214, 240, 250, 0.1);
+}
+
+.dsa-inline[data-dsa-scheme="dark"] .dsa-error {
+  color: #f0a3a3;
+}
+
+.dsa-inline[data-dsa-scheme="dark"] .dsa-badge {
+  background: rgba(135, 206, 235, 0.2);
+  border-color: rgba(180, 226, 244, 0.28);
+}
+
+.dsa-inline[data-dsa-scheme="dark"] .dsa-btn {
+  background: rgba(214, 240, 250, 0.12);
+  border-color: rgba(180, 226, 244, 0.3);
+  color: #e6f4fa;
+}
+
+.dsa-inline[data-dsa-scheme="dark"] .dsa-btn--primary {
+  background: linear-gradient(135deg, rgba(135, 206, 235, 0.9), rgba(96, 168, 200, 0.88));
+  border-color: rgba(224, 247, 250, 0.5);
+  color: #08181f;
+}
+
+.dsa-inline[data-dsa-scheme="dark"] .dsa-sidebar-action {
+  background: rgba(214, 240, 250, 0.12);
+  border-color: rgba(180, 226, 244, 0.3);
+}
+
+.dsa-inline[data-dsa-scheme="dark"] .dsa-sidebar-action--collapsed {
+  border-color: rgba(135, 206, 235, 0.45);
+  background: rgba(135, 206, 235, 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dsa-sidebar-action,
+  .dsa-input {
+    transition: none;
+  }
+
+  .dsa-sidebar-action:hover,
+  .dsa-sidebar-action:active {
+    transform: none;
+  }
+}
